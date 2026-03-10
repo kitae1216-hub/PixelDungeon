@@ -1,22 +1,40 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Start Position")]
     [SerializeField] private Vector2Int currentGridPosition = new Vector2Int(2, 2);
+
+    [Header("Move Settings")]
+    [SerializeField] private float moveDuration = 0.18f;
+    [SerializeField] private bool showDebugLogs = true;
+
+    private bool isMoving = false;
 
     private void Start()
     {
         if (GridManager.Instance == null)
         {
-            Debug.LogError("GridManager instance is missing.");
+            Debug.LogError("PlayerController: GridManager instance is missing.");
+            return;
+        }
+
+        if (!GridManager.Instance.IsValidSpawnPosition(currentGridPosition))
+        {
+            Debug.LogError($"PlayerController: Invalid start position {currentGridPosition}");
             return;
         }
 
         transform.position = GridManager.Instance.GridToWorld(currentGridPosition);
+        DebugLog($"Start Position = {currentGridPosition}");
     }
 
     private void Update()
     {
+        if (isMoving)
+            return;
+
         if (GameManager.Instance == null || GridManager.Instance == null)
             return;
 
@@ -24,7 +42,6 @@ public class PlayerController : MonoBehaviour
             return;
 
         Vector2Int input = GetMoveInput();
-
         if (input == Vector2Int.zero)
             return;
 
@@ -50,20 +67,55 @@ public class PlayerController : MonoBehaviour
 
     private void TryMove(Vector2Int direction)
     {
+        Vector2Int targetGridPosition = currentGridPosition + direction;
+
+        DebugLog($"TryMove: {currentGridPosition} -> {targetGridPosition}");
+
+        // 이동 전에 먼저 검사
+        bool canMove = GridManager.Instance.IsWalkable(targetGridPosition);
+
+        if (!canMove)
+        {
+            DebugLog($"Blocked at {targetGridPosition}");
+            return;
+        }
+
         GameManager.Instance.BeginPlayerAction();
+        StartCoroutine(MoveRoutine(targetGridPosition));
+    }
 
-        Vector2Int targetPosition = currentGridPosition + direction;
+    private IEnumerator MoveRoutine(Vector2Int targetGridPosition)
+    {
+        isMoving = true;
 
-        if (GridManager.Instance.IsWalkable(targetPosition))
+        Vector3 startPosition = transform.position;
+        Vector3 endPosition = GridManager.Instance.GridToWorld(targetGridPosition);
+
+        float elapsed = 0f;
+
+        while (elapsed < moveDuration)
         {
-            currentGridPosition = targetPosition;
-            transform.position = GridManager.Instance.GridToWorld(currentGridPosition);
-        }
-        else
-        {
-            Debug.Log("Blocked by wall");
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / moveDuration);
+            float eased = Mathf.SmoothStep(0f, 1f, t);
+
+            transform.position = Vector3.Lerp(startPosition, endPosition, eased);
+            yield return null;
         }
 
+        transform.position = endPosition;
+        currentGridPosition = targetGridPosition;
+        isMoving = false;
+
+        DebugLog($"Moved to {currentGridPosition}");
         GameManager.Instance.EndPlayerAction();
+    }
+
+    private void DebugLog(string message)
+    {
+        if (showDebugLogs)
+        {
+            Debug.Log(message);
+        }
     }
 }

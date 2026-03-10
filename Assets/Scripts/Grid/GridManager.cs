@@ -1,82 +1,114 @@
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class GridManager : MonoBehaviour
 {
     public static GridManager Instance;
 
-    [Header("Map Size")]
-    public int width = 10;
-    public int height = 10;
+    [Header("Tilemaps")]
+    [SerializeField] private Tilemap groundTilemap;
+    [SerializeField] private Tilemap wallTilemap;
 
-    private HashSet<Vector2Int> wallPositions = new HashSet<Vector2Int>();
+    [Header("Debug")]
+    [SerializeField] private bool showDebugLogs = true;
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+            DebugLog("GridManager initialized.");
         }
         else
         {
             Destroy(gameObject);
-            return;
         }
-
-        GenerateTestWalls();
-    }
-
-    private void GenerateTestWalls()
-    {
-        wallPositions.Clear();
-
-        // 외곽 테두리 벽
-        for (int x = 0; x < width; x++)
-        {
-            wallPositions.Add(new Vector2Int(x, 0));
-            wallPositions.Add(new Vector2Int(x, height - 1));
-        }
-
-        for (int y = 0; y < height; y++)
-        {
-            wallPositions.Add(new Vector2Int(0, y));
-            wallPositions.Add(new Vector2Int(width - 1, y));
-        }
-
-        // 내부 테스트용 벽
-        wallPositions.Add(new Vector2Int(4, 4));
-        wallPositions.Add(new Vector2Int(4, 5));
-    }
-
-    public bool IsInsideMap(Vector2Int position)
-    {
-        return position.x >= 0 && position.x < width &&
-               position.y >= 0 && position.y < height;
-    }
-
-    public bool IsWalkable(Vector2Int position)
-    {
-        if (!IsInsideMap(position))
-            return false;
-
-        return !wallPositions.Contains(position);
     }
 
     public Vector3 GridToWorld(Vector2Int gridPosition)
     {
-        return new Vector3(gridPosition.x, gridPosition.y, 0f);
+        Tilemap referenceTilemap = groundTilemap != null ? groundTilemap : wallTilemap;
+
+        if (referenceTilemap == null)
+        {
+            Debug.LogError("GridManager: No reference tilemap assigned.");
+            return Vector3.zero;
+        }
+
+        Vector3Int cell = new Vector3Int(gridPosition.x, gridPosition.y, 0);
+        Vector3 center = referenceTilemap.GetCellCenterWorld(cell);
+        return new Vector3(center.x, center.y, 0f);
     }
 
     public Vector2Int WorldToGrid(Vector3 worldPosition)
     {
-        return new Vector2Int(
-            Mathf.RoundToInt(worldPosition.x),
-            Mathf.RoundToInt(worldPosition.y)
-        );
+        Tilemap referenceTilemap = groundTilemap != null ? groundTilemap : wallTilemap;
+
+        if (referenceTilemap == null)
+        {
+            Debug.LogError("GridManager: No reference tilemap assigned.");
+            return Vector2Int.zero;
+        }
+
+        Vector3Int cell = referenceTilemap.WorldToCell(worldPosition);
+        return new Vector2Int(cell.x, cell.y);
     }
 
-    public bool IsWall(Vector2Int position)
+    public bool HasGround(Vector2Int gridPosition)
     {
-        return wallPositions.Contains(position);
+        if (groundTilemap == null)
+        {
+            Debug.LogError("GridManager: Ground Tilemap is not assigned.");
+            return false;
+        }
+
+        Vector3Int cell = new Vector3Int(gridPosition.x, gridPosition.y, 0);
+        return groundTilemap.GetTile(cell) != null;
+    }
+
+    public bool HasWall(Vector2Int gridPosition)
+    {
+        if (wallTilemap == null)
+        {
+            Debug.LogError("GridManager: Wall Tilemap is not assigned.");
+            return false;
+        }
+
+        Vector3Int cell = new Vector3Int(gridPosition.x, gridPosition.y, 0);
+        return wallTilemap.GetTile(cell) != null;
+    }
+
+    public bool IsWalkable(Vector2Int gridPosition)
+    {
+        bool hasGround = HasGround(gridPosition);
+        bool hasWall = HasWall(gridPosition);
+
+        if (showDebugLogs)
+        {
+            Debug.Log($"[IsWalkable] Pos={gridPosition}, Ground={hasGround}, Wall={hasWall}");
+        }
+
+        // 벽이 있으면 무조건 못 감
+        if (hasWall)
+            return false;
+
+        // 바닥이 없으면 못 감
+        if (!hasGround)
+            return false;
+
+        return true;
+    }
+
+    public bool IsValidSpawnPosition(Vector2Int gridPosition)
+    {
+        return IsWalkable(gridPosition);
+    }
+
+    private void DebugLog(string message)
+    {
+        if (showDebugLogs)
+        {
+            Debug.Log(message);
+        }
     }
 }

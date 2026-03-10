@@ -12,9 +12,11 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            Debug.Log("GameManager initialized.");
         }
         else
         {
+            Debug.LogWarning("Duplicate GameManager found. Destroying duplicate.");
             Destroy(gameObject);
         }
     }
@@ -27,14 +29,13 @@ public class GameManager : MonoBehaviour
     public void BeginPlayerAction()
     {
         IsActionProcessing = true;
+        Debug.Log("Player action started.");
     }
 
     public void EndPlayerAction()
     {
         Debug.Log("Player Turn End");
         IsActionProcessing = false;
-
-        // 1일차는 적 턴이 없으므로 플레이어 턴 유지
         IsPlayerTurn = true;
     }
 }
