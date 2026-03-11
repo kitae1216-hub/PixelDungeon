@@ -151,8 +151,54 @@ Transform:
   - {fileID: 578371545}
   - {fileID: 1576497549}
   - {fileID: 872808001}
+  - {fileID: 162310462}
+  - {fileID: 759380872}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &162310461
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 162310462}
+  - component: {fileID: 162310463}
+  m_Layer: 0
+  m_Name: GridOccupancyManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &162310462
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 162310461}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 14151306}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &162310463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 162310461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2b262a645b0ecd4aa910ed9b82d49a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GridOccupancyManager
 --- !u!1 &343238356
 GameObject:
   m_ObjectHideFlags: 0
@@ -2180,6 +2226,55 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &759380871
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 759380872}
+  - component: {fileID: 759380873}
+  m_Layer: 0
+  m_Name: EnemySpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &759380872
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 759380871}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 14151306}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &759380873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 759380871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70672438d1b4be34dab3bc04fd592129, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
+  dungeonGenerator: {fileID: 872808002}
+  enemyPrefab: {fileID: 7658539510490767926, guid: 79d17f8405ef549449794b3a33318357, type: 3}
+  enemiesPerRoomMin: 1
+  enemiesPerRoomMax: 2
+  showDebugLogs: 1
 --- !u!1 &872808000
 GameObject:
   m_ObjectHideFlags: 0
@@ -2189,6 +2284,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 872808001}
+  - component: {fileID: 872808002}
   m_Layer: 0
   m_Name: DungeonGenerator
   m_TagString: Untagged
@@ -2211,6 +2307,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 14151306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &872808002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872808000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0875b54c65816a4419a462b255720a8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonGenerator
+  mapWidth: 40
+  mapHeight: 25
+  roomCount: 8
+  roomMinSize: 4
+  roomMaxSize: 8
+  generationAttempts: 40
+  playerController: {fileID: 1351673765}
+  showDebugLogs: 1
 --- !u!1 &1351673761
 GameObject:
   m_ObjectHideFlags: 0
@@ -2223,6 +2339,7 @@ GameObject:
   - component: {fileID: 1351673763}
   - component: {fileID: 1351673762}
   - component: {fileID: 1351673765}
+  - component: {fileID: 1351673766}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2354,7 +2471,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   currentGridPosition: {x: 2, y: 2}
   moveDuration: 0.18
+  attackPower: 3
   showDebugLogs: 1
+--- !u!114 &1351673766
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1351673761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 002a64b5ee73f894abe1dbda3355cb08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Health
+  maxHP: 20
+  destroyOnDeath: 0
 --- !u!1 &1576497548
 GameObject:
   m_ObjectHideFlags: 0
@@ -2401,6 +2533,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GridManager
   groundTilemap: {fileID: 343238359}
   wallTilemap: {fileID: 736720521}
+  groundTile: {fileID: 11400000, guid: e7fafc71ba3aed449b79295a38a86e0d, type: 2}
+  wallTile: {fileID: 11400000, guid: 57a486d3d5faa6a42a64c9f82ded28dd, type: 2}
   showDebugLogs: 1
 --- !u!1 &2120422586
 GameObject:

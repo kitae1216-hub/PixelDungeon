@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -7,18 +9,24 @@ public class GameManager : MonoBehaviour
     public bool IsPlayerTurn { get; private set; } = true;
     public bool IsActionProcessing { get; private set; } = false;
 
+    private readonly List<EnemyController> enemies = new List<EnemyController>();
+    private PlayerController player;
+
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            Debug.Log("GameManager initialized.");
         }
         else
         {
-            Debug.LogWarning("Duplicate GameManager found. Destroying duplicate.");
             Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        player = FindAnyObjectByType<PlayerController>();
     }
 
     public bool CanPlayerAct()
@@ -29,12 +37,52 @@ public class GameManager : MonoBehaviour
     public void BeginPlayerAction()
     {
         IsActionProcessing = true;
-        Debug.Log("Player action started.");
     }
 
     public void EndPlayerAction()
     {
-        Debug.Log("Player Turn End");
+        StartCoroutine(ProcessEnemyTurn());
+    }
+
+    public void RegisterEnemy(EnemyController enemy)
+    {
+        if (enemy == null)
+            return;
+
+        if (!enemies.Contains(enemy))
+        {
+            enemies.Add(enemy);
+        }
+    }
+
+    public void UnregisterEnemy(EnemyController enemy)
+    {
+        if (enemy == null)
+            return;
+
+        enemies.Remove(enemy);
+    }
+
+    private IEnumerator ProcessEnemyTurn()
+    {
+        IsPlayerTurn = false;
+
+        for (int i = enemies.Count - 1; i >= 0; i--)
+        {
+            if (enemies[i] == null)
+            {
+                enemies.RemoveAt(i);
+            }
+        }
+
+        foreach (EnemyController enemy in enemies)
+        {
+            if (enemy == null)
+                continue;
+
+            yield return enemy.TakeTurn(player);
+        }
+
         IsActionProcessing = false;
         IsPlayerTurn = true;
     }

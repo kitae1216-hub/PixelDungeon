@@ -9,8 +9,15 @@ public class GridManager : MonoBehaviour
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tilemap wallTilemap;
 
+    [Header("Tiles")]
+    [SerializeField] private TileBase groundTile;
+    [SerializeField] private TileBase wallTile;
+
     [Header("Debug")]
-    [SerializeField] private bool showDebugLogs = true;
+    [SerializeField] private bool showDebugLogs = false;
+
+    public Tilemap GroundTilemap => groundTilemap;
+    public Tilemap WallTilemap => wallTilemap;
 
     private void Awake()
     {
@@ -23,6 +30,57 @@ public class GridManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    public void ClearAllTiles()
+    {
+        if (groundTilemap != null)
+            groundTilemap.ClearAllTiles();
+
+        if (wallTilemap != null)
+            wallTilemap.ClearAllTiles();
+    }
+
+    public void SetGroundTile(Vector2Int gridPosition)
+    {
+        if (groundTilemap == null || groundTile == null)
+        {
+            Debug.LogError("GridManager: Ground Tilemap or Ground Tile is missing.");
+            return;
+        }
+
+        Vector3Int cell = new Vector3Int(gridPosition.x, gridPosition.y, 0);
+        groundTilemap.SetTile(cell, groundTile);
+    }
+
+    public void SetWallTile(Vector2Int gridPosition)
+    {
+        if (wallTilemap == null || wallTile == null)
+        {
+            Debug.LogError("GridManager: Wall Tilemap or Wall Tile is missing.");
+            return;
+        }
+
+        Vector3Int cell = new Vector3Int(gridPosition.x, gridPosition.y, 0);
+        wallTilemap.SetTile(cell, wallTile);
+    }
+
+    public void ClearWallTile(Vector2Int gridPosition)
+    {
+        if (wallTilemap == null)
+            return;
+
+        Vector3Int cell = new Vector3Int(gridPosition.x, gridPosition.y, 0);
+        wallTilemap.SetTile(cell, null);
+    }
+
+    public void ClearGroundTile(Vector2Int gridPosition)
+    {
+        if (groundTilemap == null)
+            return;
+
+        Vector3Int cell = new Vector3Int(gridPosition.x, gridPosition.y, 0);
+        groundTilemap.SetTile(cell, null);
     }
 
     public Vector3 GridToWorld(Vector2Int gridPosition)
@@ -63,7 +121,7 @@ public class GridManager : MonoBehaviour
         }
 
         Vector3Int cell = new Vector3Int(gridPosition.x, gridPosition.y, 0);
-        return groundTilemap.GetTile(cell) != null;
+        return groundTilemap.HasTile(cell);
     }
 
     public bool HasWall(Vector2Int gridPosition)
@@ -75,7 +133,7 @@ public class GridManager : MonoBehaviour
         }
 
         Vector3Int cell = new Vector3Int(gridPosition.x, gridPosition.y, 0);
-        return wallTilemap.GetTile(cell) != null;
+        return wallTilemap.HasTile(cell);
     }
 
     public bool IsWalkable(Vector2Int gridPosition)
@@ -83,16 +141,11 @@ public class GridManager : MonoBehaviour
         bool hasGround = HasGround(gridPosition);
         bool hasWall = HasWall(gridPosition);
 
-        if (showDebugLogs)
-        {
-            Debug.Log($"[IsWalkable] Pos={gridPosition}, Ground={hasGround}, Wall={hasWall}");
-        }
+        DebugLog($"[IsWalkable] Pos={gridPosition}, Ground={hasGround}, Wall={hasWall}");
 
-        // 벽이 있으면 무조건 못 감
         if (hasWall)
             return false;
 
-        // 바닥이 없으면 못 감
         if (!hasGround)
             return false;
 
