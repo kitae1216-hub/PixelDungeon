@@ -26,10 +26,14 @@ public class Health : MonoBehaviour
         if (IsDead)
             return;
 
-        CurrentHP -= amount;
+        EquipmentManager equipment = GetComponent<EquipmentManager>();
+        int defense = equipment != null ? equipment.GetDefenseBonus() : 0;
+        int finalDamage = Mathf.Max(1, amount - defense);
+
+        CurrentHP -= finalDamage;
         CurrentHP = Mathf.Max(CurrentHP, 0);
 
-        Debug.Log($"{gameObject.name} took {amount} damage. HP: {CurrentHP}/{maxHP}");
+        Debug.Log($"{gameObject.name} took {finalDamage} damage. HP: {CurrentHP}/{maxHP}");
 
         if (CurrentHP <= 0)
         {
@@ -44,6 +48,8 @@ public class Health : MonoBehaviour
 
         CurrentHP += amount;
         CurrentHP = Mathf.Min(CurrentHP, maxHP);
+
+        Debug.Log($"{gameObject.name} healed {amount}. HP: {CurrentHP}/{maxHP}");
     }
 
     private void Die()

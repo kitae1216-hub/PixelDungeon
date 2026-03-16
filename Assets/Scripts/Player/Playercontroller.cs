@@ -9,14 +9,31 @@ public class PlayerController : MonoBehaviour
 
     [Header("Move Settings")]
     [SerializeField] private float moveDuration = 0.18f;
-    [SerializeField] private int attackPower = 3;
+    [SerializeField] private int baseAttackPower = 3;
+
+    [Header("Input Repeat Settings")]
+    [SerializeField] private float firstRepeatDelay = 0.22f;
+    [SerializeField] private float repeatInterval = 0.10f;
+
+    [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
 
     private bool isMoving = false;
     private bool isInitialized = false;
 
+    private Vector2Int heldDirection = Vector2Int.zero;
+    private Vector2Int lastExecutedDirection = Vector2Int.zero;
+    private float nextRepeatTime = 0f;
+    private bool hasConsumedInitialPress = false;
+
+    private Inventory inventory;
+    private EquipmentManager equipmentManager;
+
     private void Start()
     {
+        inventory = GetComponent<Inventory>();
+        equipmentManager = GetComponent<EquipmentManager>();
+
         if (isInitialized)
             return;
 
@@ -44,6 +61,9 @@ public class PlayerController : MonoBehaviour
         if (!isInitialized)
             return;
 
+        HandleInventoryHotkeys();
+        UpdateHeldDirection();
+
         if (isMoving)
             return;
 
@@ -53,16 +73,53 @@ public class PlayerController : MonoBehaviour
         if (!GameManager.Instance.CanPlayerAct())
             return;
 
-        Vector2Int input = GetMoveInput();
-        if (input == Vector2Int.zero)
+        if (!ShouldProcessHeldInput())
             return;
 
-        TryMove(input);
+        TryMove(heldDirection);
     }
 
-    private Vector2Int GetMoveInput()
+    private void HandleInventoryHotkeys()
     {
-        // 꾹 누르고 있으면 계속 입력 유지
+        if (inventory == null)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            inventory.UseItemAt(0);
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            inventory.UseItemAt(1);
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+            inventory.UseItemAt(2);
+    }
+
+    private void UpdateHeldDirection()
+    {
+        Vector2Int newDirection = GetRawHeldDirection();
+
+        if (newDirection == Vector2Int.zero)
+        {
+            heldDirection = Vector2Int.zero;
+            lastExecutedDirection = Vector2Int.zero;
+            hasConsumedInitialPress = false;
+            return;
+        }
+
+        if (newDirection != heldDirection)
+        {
+            heldDirection = newDirection;
+            hasConsumedInitialPress = false;
+            lastExecutedDirection = Vector2Int.zero;
+        }
+        else
+        {
+            heldDirection = newDirection;
+        }
+    }
+
+    private Vector2Int GetRawHeldDirection()
+    {
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
             return Vector2Int.up;
 
@@ -76,6 +133,28 @@ public class PlayerController : MonoBehaviour
             return Vector2Int.right;
 
         return Vector2Int.zero;
+    }
+
+    private bool ShouldProcessHeldInput()
+    {
+        if (heldDirection == Vector2Int.zero)
+            return false;
+
+        if (!hasConsumedInitialPress)
+        {
+            hasConsumedInitialPress = true;
+            lastExecutedDirection = heldDirection;
+            nextRepeatTime = Time.time + firstRepeatDelay;
+            return true;
+        }
+
+        if (heldDirection == lastExecutedDirection && Time.time >= nextRepeatTime)
+        {
+            nextRepeatTime = Time.time + repeatInterval;
+            return true;
+        }
+
+        return false;
     }
 
     private void TryMove(Vector2Int direction)
@@ -99,12 +178,14 @@ public class PlayerController : MonoBehaviour
         if (!canMove)
         {
             DebugLog($"Blocked at {targetGridPosition}");
+            nextRepeatTime = Time.time + repeatInterval;
             return;
         }
 
         if (GridOccupancyManager.Instance != null && GridOccupancyManager.Instance.IsOccupied(targetGridPosition))
         {
             DebugLog($"Tile occupied at {targetGridPosition}");
+            nextRepeatTime = Time.time + repeatInterval;
             return;
         }
 
@@ -114,15 +195,23 @@ public class PlayerController : MonoBehaviour
 
     private void AttackEnemy(EnemyController enemy)
     {
+        int finalAttackPower = baseAttackPower;
+        if (equipmentManager != null)
+        {
+            finalAttackPower += equipmentManager.GetAttackBonus();
+        }
+
         Health enemyHealth = enemy.GetComponent<Health>();
         if (enemyHealth != null)
         {
-            enemyHealth.TakeDamage(attackPower);
-            DebugLog($"Player attacked {enemy.gameObject.name} for {attackPower}");
+            enemyHealth.TakeDamage(finalAttackPower);
+            DebugLog($"Player attacked {enemy.gameObject.name} for {finalAttackPower}");
         }
 
         GameManager.Instance.BeginPlayerAction();
         GameManager.Instance.EndPlayerAction();
+
+        nextRepeatTime = Time.time + repeatInterval;
     }
 
     private IEnumerator MoveRoutine(Vector2Int targetGridPosition)
@@ -152,8 +241,24 @@ public class PlayerController : MonoBehaviour
 
         isMoving = false;
 
+        TryAutoPickup();
         DebugLog($"Moved to {currentGridPosition}");
         GameManager.Instance.EndPlayerAction();
+
+        nextRepeatTime = Time.time + repeatInterval;
+    }
+
+    private void TryAutoPickup()
+    {
+        PickupItem pickup = ItemPickupManager.Instance?.GetItemAt(currentGridPosition);
+        if (pickup != null)
+        {
+            bool picked = pickup.TryPickup(gameObject);
+            if (picked)
+            {
+                DebugLog($"Picked up item at {currentGridPosition}");
+            }
+        }
     }
 
     public void SetGridPositionImmediate(Vector2Int newGridPosition)

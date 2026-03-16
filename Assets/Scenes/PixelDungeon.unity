@@ -153,6 +153,8 @@ Transform:
   - {fileID: 872808001}
   - {fileID: 162310462}
   - {fileID: 759380872}
+  - {fileID: 963592529}
+  - {fileID: 1001315973}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &162310461
@@ -2327,6 +2329,102 @@ MonoBehaviour:
   generationAttempts: 40
   playerController: {fileID: 1351673765}
   showDebugLogs: 1
+--- !u!1 &963592528
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 963592529}
+  - component: {fileID: 963592530}
+  m_Layer: 0
+  m_Name: ItemPickupManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &963592529
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963592528}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 14151306}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &963592530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963592528}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92e50d241f1edaa4fa9b795af1f9b6f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemPickupManager
+--- !u!1 &1001315972
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1001315973}
+  - component: {fileID: 1001315974}
+  m_Layer: 0
+  m_Name: ItemSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1001315973
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001315972}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 14151306}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1001315974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001315972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aab7e0321814b874796b0b3850d1b966, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemSpawner
+  dungeonGenerator: {fileID: 872808002}
+  pickupItemPrefab: {fileID: 1827881212026619681, guid: 527f33633e06a0344a598e84b96d647d, type: 3}
+  spawnableItems:
+  - {fileID: 11400000, guid: c8fc6099e93139a4882eea29136d6a05, type: 2}
+  - {fileID: 11400000, guid: 3df624311d6b2944d867bff0c8377433, type: 2}
+  - {fileID: 11400000, guid: fcb117d2eca029740843a8b2d9ef4e80, type: 2}
+  itemsPerRun: 4
+  showDebugLogs: 1
 --- !u!1 &1351673761
 GameObject:
   m_ObjectHideFlags: 0
@@ -2340,6 +2438,8 @@ GameObject:
   - component: {fileID: 1351673762}
   - component: {fileID: 1351673765}
   - component: {fileID: 1351673766}
+  - component: {fileID: 1351673768}
+  - component: {fileID: 1351673767}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2470,8 +2570,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   currentGridPosition: {x: 2, y: 2}
-  moveDuration: 0.18
-  attackPower: 3
+  moveDuration: 0.14
+  baseAttackPower: 3
+  firstRepeatDelay: 0.18
+  repeatInterval: 0.08
   showDebugLogs: 1
 --- !u!114 &1351673766
 MonoBehaviour:
@@ -2487,6 +2589,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Health
   maxHP: 20
   destroyOnDeath: 0
+--- !u!114 &1351673767
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1351673761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6753331daa62ee44b307fb4c7fb4e19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EquipmentManager
+  equippedWeapon: {fileID: 0}
+  equippedArmor: {fileID: 0}
+  showDebugLogs: 1
+--- !u!114 &1351673768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1351673761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 169e3bca1f629f540b09dd17f183693c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory
+  maxSlots: 6
+  showDebugLogs: 1
 --- !u!1 &1576497548
 GameObject:
   m_ObjectHideFlags: 0
