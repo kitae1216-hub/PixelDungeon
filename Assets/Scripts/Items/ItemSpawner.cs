@@ -54,6 +54,7 @@ public class ItemSpawner : MonoBehaviour
 
         List<RectInt> rooms = dungeonGenerator.GetRooms();
         Vector2Int playerSpawn = dungeonGenerator.GetPlayerSpawnPosition();
+        Vector2Int stairsPos = dungeonGenerator.GetStairsPosition();
 
         int spawnedCount = 0;
         int safety = 100;
@@ -71,6 +72,9 @@ public class ItemSpawner : MonoBehaviour
             Vector2Int pos = GetRandomFloorPositionInRoom(room);
 
             if (pos == playerSpawn)
+                continue;
+
+            if (pos == stairsPos)
                 continue;
 
             if (GridOccupancyManager.Instance != null && GridOccupancyManager.Instance.IsOccupied(pos))
@@ -92,24 +96,24 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
+    public void ClearExistingItems()
+    {
+        for (int i = spawnedItems.Count - 1; i >= 0; i--)
+        {
+            if (spawnedItems[i] != null)
+            {
+                Destroy(spawnedItems[i].gameObject);
+            }
+        }
+
+        spawnedItems.Clear();
+    }
+
     private Vector2Int GetRandomFloorPositionInRoom(RectInt room)
     {
         int x = Random.Range(room.xMin, room.xMax);
         int y = Random.Range(room.yMin, room.yMax);
         return new Vector2Int(x, y);
-    }
-
-    private void ClearExistingItems()
-    {
-        foreach (PickupItem item in spawnedItems)
-        {
-            if (item != null)
-            {
-                Destroy(item.gameObject);
-            }
-        }
-
-        spawnedItems.Clear();
     }
 
     private void DebugLog(string message)

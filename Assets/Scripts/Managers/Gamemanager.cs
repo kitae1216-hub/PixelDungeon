@@ -44,6 +44,13 @@ public class GameManager : MonoBehaviour
         StartCoroutine(ProcessEnemyTurn());
     }
 
+    public void ForcePlayerTurnReady()
+    {
+        StopAllCoroutines();
+        IsActionProcessing = false;
+        IsPlayerTurn = true;
+    }
+
     public void RegisterEnemy(EnemyController enemy)
     {
         if (enemy == null)
@@ -61,6 +68,11 @@ public class GameManager : MonoBehaviour
             return;
 
         enemies.Remove(enemy);
+    }
+
+    public void ClearAllEnemies()
+    {
+        enemies.Clear();
     }
 
     private IEnumerator ProcessEnemyTurn()

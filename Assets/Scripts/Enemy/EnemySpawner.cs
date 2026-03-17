@@ -58,6 +58,9 @@ public class EnemySpawner : MonoBehaviour
                 if (spawnPos == playerStart)
                     continue;
 
+                if (spawnPos == dungeonGenerator.GetStairsPosition())
+                    continue;
+
                 if (GridOccupancyManager.Instance.IsOccupied(spawnPos))
                     continue;
 
@@ -73,24 +76,25 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
+    public void ClearExistingEnemies()
+    {
+        for (int i = spawnedEnemies.Count - 1; i >= 0; i--)
+        {
+            if (spawnedEnemies[i] != null)
+            {
+                GameManager.Instance?.UnregisterEnemy(spawnedEnemies[i]);
+                Destroy(spawnedEnemies[i].gameObject);
+            }
+        }
+
+        spawnedEnemies.Clear();
+    }
+
     private Vector2Int GetRandomFloorPositionInRoom(RectInt room)
     {
         int x = Random.Range(room.xMin, room.xMax);
         int y = Random.Range(room.yMin, room.yMax);
         return new Vector2Int(x, y);
-    }
-
-    private void ClearExistingEnemies()
-    {
-        foreach (EnemyController enemy in spawnedEnemies)
-        {
-            if (enemy != null)
-            {
-                Destroy(enemy.gameObject);
-            }
-        }
-
-        spawnedEnemies.Clear();
     }
 
     private void DebugLog(string message)

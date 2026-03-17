@@ -8,16 +8,19 @@ public class GridManager : MonoBehaviour
     [Header("Tilemaps")]
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tilemap wallTilemap;
+    [SerializeField] private Tilemap overlayTilemap;
 
     [Header("Tiles")]
     [SerializeField] private TileBase groundTile;
     [SerializeField] private TileBase wallTile;
+    [SerializeField] private TileBase stairsTile;
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = false;
 
     public Tilemap GroundTilemap => groundTilemap;
     public Tilemap WallTilemap => wallTilemap;
+    public Tilemap OverlayTilemap => overlayTilemap;
 
     private void Awake()
     {
@@ -39,6 +42,15 @@ public class GridManager : MonoBehaviour
 
         if (wallTilemap != null)
             wallTilemap.ClearAllTiles();
+
+        if (overlayTilemap != null)
+            overlayTilemap.ClearAllTiles();
+    }
+
+    public void ClearOverlayTiles()
+    {
+        if (overlayTilemap != null)
+            overlayTilemap.ClearAllTiles();
     }
 
     public void SetGroundTile(Vector2Int gridPosition)
@@ -65,22 +77,16 @@ public class GridManager : MonoBehaviour
         wallTilemap.SetTile(cell, wallTile);
     }
 
-    public void ClearWallTile(Vector2Int gridPosition)
+    public void SetStairsTile(Vector2Int gridPosition)
     {
-        if (wallTilemap == null)
+        if (overlayTilemap == null || stairsTile == null)
+        {
+            Debug.LogError("GridManager: Overlay Tilemap or Stairs Tile is missing.");
             return;
+        }
 
         Vector3Int cell = new Vector3Int(gridPosition.x, gridPosition.y, 0);
-        wallTilemap.SetTile(cell, null);
-    }
-
-    public void ClearGroundTile(Vector2Int gridPosition)
-    {
-        if (groundTilemap == null)
-            return;
-
-        Vector3Int cell = new Vector3Int(gridPosition.x, gridPosition.y, 0);
-        groundTilemap.SetTile(cell, null);
+        overlayTilemap.SetTile(cell, stairsTile);
     }
 
     public Vector3 GridToWorld(Vector2Int gridPosition)

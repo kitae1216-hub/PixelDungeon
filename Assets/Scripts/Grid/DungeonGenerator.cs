@@ -24,6 +24,7 @@ public class DungeonGenerator : MonoBehaviour
     private List<Room> rooms = new List<Room>();
     private List<RectInt> roomRects = new List<RectInt>();
     private Vector2Int playerSpawnPosition;
+    private Vector2Int stairsPosition;
 
     private void Start()
     {
@@ -49,15 +50,22 @@ public class DungeonGenerator : MonoBehaviour
 
         CreateRooms();
         ConnectRooms();
+
+        if (rooms.Count > 0)
+        {
+            playerSpawnPosition = rooms[0].Center;
+            stairsPosition = rooms[rooms.Count - 1].Center;
+        }
+
         RenderMap();
 
         if (rooms.Count > 0 && playerController != null)
         {
-            playerSpawnPosition = rooms[0].Center;
             playerController.SetGridPositionImmediate(playerSpawnPosition);
             GridOccupancyManager.Instance?.ClearAll();
             GridOccupancyManager.Instance?.SetOccupant(playerSpawnPosition, playerController.gameObject);
             DebugLog($"Player spawn set to {playerSpawnPosition}");
+            DebugLog($"Stairs position set to {stairsPosition}");
         }
         else
         {
@@ -73,6 +81,11 @@ public class DungeonGenerator : MonoBehaviour
     public Vector2Int GetPlayerSpawnPosition()
     {
         return playerSpawnPosition;
+    }
+
+    public Vector2Int GetStairsPosition()
+    {
+        return stairsPosition;
     }
 
     private void CreateRooms()
@@ -201,6 +214,8 @@ public class DungeonGenerator : MonoBehaviour
                 }
             }
         }
+
+        GridManager.Instance.SetStairsTile(stairsPosition);
 
         DebugLog("Map rendered.");
     }

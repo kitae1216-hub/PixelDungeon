@@ -73,6 +73,9 @@ public class PlayerController : MonoBehaviour
         if (!GameManager.Instance.CanPlayerAct())
             return;
 
+        if (FloorManager.Instance != null && FloorManager.Instance.IsTransitioningFloor)
+            return;
+
         if (!ShouldProcessHeldInput())
             return;
 
@@ -242,6 +245,13 @@ public class PlayerController : MonoBehaviour
         isMoving = false;
 
         TryAutoPickup();
+
+        if (CheckStairsAndGoNextFloor())
+        {
+            nextRepeatTime = Time.time + 0.25f;
+            yield break;
+        }
+
         DebugLog($"Moved to {currentGridPosition}");
         GameManager.Instance.EndPlayerAction();
 
@@ -259,6 +269,22 @@ public class PlayerController : MonoBehaviour
                 DebugLog($"Picked up item at {currentGridPosition}");
             }
         }
+    }
+
+    private bool CheckStairsAndGoNextFloor()
+    {
+        DungeonGenerator dungeonGenerator = FindAnyObjectByType<DungeonGenerator>();
+        if (dungeonGenerator == null)
+            return false;
+
+        if (currentGridPosition == dungeonGenerator.GetStairsPosition())
+        {
+            DebugLog("Stepped on stairs.");
+            FloorManager.Instance?.GoToNextFloor();
+            return true;
+        }
+
+        return false;
     }
 
     public void SetGridPositionImmediate(Vector2Int newGridPosition)
