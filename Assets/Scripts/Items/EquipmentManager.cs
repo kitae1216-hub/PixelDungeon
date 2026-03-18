@@ -18,8 +18,11 @@ public class EquipmentManager : MonoBehaviour
             return;
 
         equippedWeapon = itemData;
+
         DebugLog($"Weapon equipped: {itemData.itemName}");
-        UIManager.Instance?.RefreshEquipment();
+        MessageLog.Instance?.AddMessage($"{itemData.itemName} ÀåÂø");
+
+        ForceRefreshUI();
     }
 
     public void EquipArmor(ItemData itemData)
@@ -28,8 +31,11 @@ public class EquipmentManager : MonoBehaviour
             return;
 
         equippedArmor = itemData;
+
         DebugLog($"Armor equipped: {itemData.itemName}");
-        UIManager.Instance?.RefreshEquipment();
+        MessageLog.Instance?.AddMessage($"{itemData.itemName} ÀåÂø");
+
+        ForceRefreshUI();
     }
 
     public int GetAttackBonus()
@@ -40,6 +46,16 @@ public class EquipmentManager : MonoBehaviour
     public int GetDefenseBonus()
     {
         return equippedArmor != null ? equippedArmor.defenseBonus : 0;
+    }
+
+    private void ForceRefreshUI()
+    {
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.RefreshEquipment();
+            UIManager.Instance.RefreshInventory();
+            UIManager.Instance.RefreshAll();
+        }
     }
 
     private void DebugLog(string message)

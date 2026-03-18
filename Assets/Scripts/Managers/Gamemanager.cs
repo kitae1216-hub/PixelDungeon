@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 
 public class GameManager : MonoBehaviour
 {
@@ -29,6 +28,14 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        // 재시작/씬 전환 후 멈춘 상태 방지
+        Time.timeScale = 1f;
+
+        IsGameOver = false;
+        IsGameClear = false;
+        IsActionProcessing = false;
+        IsPlayerTurn = true;
+
         player = FindAnyObjectByType<PlayerController>();
     }
 
@@ -69,9 +76,7 @@ public class GameManager : MonoBehaviour
             return;
 
         if (!enemies.Contains(enemy))
-        {
             enemies.Add(enemy);
-        }
     }
 
     public void UnregisterEnemy(EnemyController enemy)
@@ -98,6 +103,7 @@ public class GameManager : MonoBehaviour
 
         MessageLog.Instance?.AddMessage("게임 오버");
         UIManager.Instance?.ShowGameOverPanel();
+        Time.timeScale = 0f;
     }
 
     public void TriggerGameClear()
@@ -111,6 +117,7 @@ public class GameManager : MonoBehaviour
 
         MessageLog.Instance?.AddMessage("데모 클리어");
         UIManager.Instance?.ShowClearPanel();
+        Time.timeScale = 0f;
     }
 
     private IEnumerator ProcessEnemyTurn()
@@ -120,9 +127,7 @@ public class GameManager : MonoBehaviour
         for (int i = enemies.Count - 1; i >= 0; i--)
         {
             if (enemies[i] == null)
-            {
                 enemies.RemoveAt(i);
-            }
         }
 
         foreach (EnemyController enemy in enemies)

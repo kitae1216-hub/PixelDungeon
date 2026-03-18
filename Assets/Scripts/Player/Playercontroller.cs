@@ -59,25 +59,43 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         if (!isInitialized)
+        {
+            Debug.Log("Player blocked: not initialized");
             return;
+        }
 
         if (GameManager.Instance != null && (GameManager.Instance.IsGameOver || GameManager.Instance.IsGameClear))
+        {
+            Debug.Log("Player blocked: game over or clear");
             return;
+        }
 
         HandleInventoryHotkeys();
         UpdateHeldDirection();
 
         if (isMoving)
+        {
+            Debug.Log("Player blocked: isMoving");
             return;
+        }
 
         if (GameManager.Instance == null || GridManager.Instance == null)
+        {
+            Debug.Log("Player blocked: missing manager");
             return;
+        }
 
         if (!GameManager.Instance.CanPlayerAct())
+        {
+            Debug.Log("Player blocked: CanPlayerAct false");
             return;
+        }
 
         if (FloorManager.Instance != null && FloorManager.Instance.IsTransitioningFloor)
+        {
+            Debug.Log("Player blocked: floor transitioning");
             return;
+        }
 
         if (!ShouldProcessHeldInput())
             return;
@@ -98,6 +116,10 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Alpha3))
             inventory.UseItemAt(2);
+
+        // 포션 전용 빠른 사용 키
+        if (Input.GetKeyDown(KeyCode.Q))
+            inventory.UseFirstConsumable();
     }
 
     private void UpdateHeldDirection()
@@ -199,6 +221,7 @@ public class PlayerController : MonoBehaviour
     private void AttackEnemy(EnemyController enemy)
     {
         int finalAttackPower = baseAttackPower;
+
         if (equipmentManager != null)
         {
             finalAttackPower += equipmentManager.GetAttackBonus();

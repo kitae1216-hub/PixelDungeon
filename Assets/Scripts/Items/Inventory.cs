@@ -27,7 +27,9 @@ public class Inventory : MonoBehaviour
         items.Add(itemData);
         DebugLog($"Added item: {itemData.itemName}");
         MessageLog.Instance?.AddMessage($"{itemData.itemName} È¹µæ");
+
         UIManager.Instance?.RefreshInventory();
+        UIManager.Instance?.RefreshAll();
         return true;
     }
 
@@ -38,7 +40,9 @@ public class Inventory : MonoBehaviour
 
         DebugLog($"Removed item: {items[index].itemName}");
         items.RemoveAt(index);
+
         UIManager.Instance?.RefreshInventory();
+        UIManager.Instance?.RefreshAll();
         return true;
     }
 
@@ -70,6 +74,7 @@ public class Inventory : MonoBehaviour
                     health.Heal(item.healAmount);
                     MessageLog.Instance?.AddMessage($"{item.itemName} »ç¿ë");
                     RemoveItemAt(index);
+                    UIManager.Instance?.RefreshAll();
                     return true;
                 }
                 break;
@@ -80,6 +85,7 @@ public class Inventory : MonoBehaviour
                     equipment.EquipWeapon(item);
                     MessageLog.Instance?.AddMessage($"{item.itemName} ÀåÂø");
                     RemoveItemAt(index);
+                    UIManager.Instance?.RefreshAll();
                     return true;
                 }
                 break;
@@ -90,11 +96,27 @@ public class Inventory : MonoBehaviour
                     equipment.EquipArmor(item);
                     MessageLog.Instance?.AddMessage($"{item.itemName} ÀåÂø");
                     RemoveItemAt(index);
+                    UIManager.Instance?.RefreshAll();
                     return true;
                 }
                 break;
         }
 
+        return false;
+    }
+
+    public bool UseFirstConsumable()
+    {
+        for (int i = 0; i < items.Count; i++)
+        {
+            if (items[i] != null && items[i].itemType == ItemType.Consumable)
+            {
+                return UseItemAt(i);
+            }
+        }
+
+        DebugLog("No consumable item found.");
+        MessageLog.Instance?.AddMessage("»ç¿ë °¡´ÉÇÑ Æ÷¼ÇÀÌ ¾ø½À´Ï´Ù");
         return false;
     }
 

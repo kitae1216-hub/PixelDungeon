@@ -27,8 +27,14 @@ public class Health : MonoBehaviour
         if (IsDead)
             return;
 
+        int defense = 0;
+
         EquipmentManager equipment = GetComponent<EquipmentManager>();
-        int defense = equipment != null ? equipment.GetDefenseBonus() : 0;
+        if (equipment != null)
+        {
+            defense = equipment.GetDefenseBonus();
+        }
+
         int finalDamage = Mathf.Max(1, amount - defense);
 
         CurrentHP -= finalDamage;

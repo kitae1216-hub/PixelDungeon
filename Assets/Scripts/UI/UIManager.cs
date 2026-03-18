@@ -1,3 +1,4 @@
+using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine;
 
@@ -92,14 +93,22 @@ public class UIManager : MonoBehaviour
         if (equipmentText == null || equipmentManager == null)
             return;
 
-        string weapon = equipmentManager.EquippedWeapon != null ? equipmentManager.EquippedWeapon.itemName : "없음";
-        string armor = equipmentManager.EquippedArmor != null ? equipmentManager.EquippedArmor.itemName : "없음";
+        string weaponName = equipmentManager.EquippedWeapon != null
+            ? equipmentManager.EquippedWeapon.itemName
+            : "없음";
+
+        string armorName = equipmentManager.EquippedArmor != null
+            ? equipmentManager.EquippedArmor.itemName
+            : "없음";
+
+        int atkBonus = equipmentManager.GetAttackBonus();
+        int defBonus = equipmentManager.GetDefenseBonus();
 
         equipmentText.text =
-            $"무기: {weapon}\n" +
-            $"방어구: {armor}\n" +
-            $"ATK 보너스: {equipmentManager.GetAttackBonus()}\n" +
-            $"DEF 보너스: {equipmentManager.GetDefenseBonus()}";
+            $"무기: {weaponName}\n" +
+            $"방어구: {armorName}\n" +
+            $"ATK 보너스: {atkBonus}\n" +
+            $"DEF 보너스: {defBonus}";
     }
 
     public void RefreshInventory()
@@ -143,5 +152,20 @@ public class UIManager : MonoBehaviour
     {
         if (clearPanel != null)
             clearPanel.SetActive(true);
+    }
+
+    public void RestartCurrentScene()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void HideAllPanels()
+    {
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
+
+        if (clearPanel != null)
+            clearPanel.SetActive(false);
     }
 }
