@@ -20,7 +20,6 @@ public class EnemyController : MonoBehaviour
     {
         currentGridPosition = spawnGridPosition;
         transform.position = GridManager.Instance.GridToWorld(currentGridPosition);
-
         GridOccupancyManager.Instance.SetOccupant(currentGridPosition, gameObject);
     }
 
@@ -64,7 +63,7 @@ public class EnemyController : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.TakeDamage(attackPower);
-            DebugLog($"{gameObject.name} attacked Player for {attackPower}");
+            MessageLog.Instance?.AddMessage($"{gameObject.name} АјАн {attackPower}");
         }
     }
 
@@ -73,17 +72,11 @@ public class EnemyController : MonoBehaviour
         Vector2Int diff = target - currentGridPosition;
 
         if (Mathf.Abs(diff.x) > Mathf.Abs(diff.y))
-        {
             return new Vector2Int(diff.x > 0 ? 1 : -1, 0);
-        }
         else if (diff.y != 0)
-        {
             return new Vector2Int(0, diff.y > 0 ? 1 : -1);
-        }
         else if (diff.x != 0)
-        {
             return new Vector2Int(diff.x > 0 ? 1 : -1, 0);
-        }
 
         return Vector2Int.zero;
     }
@@ -126,14 +119,5 @@ public class EnemyController : MonoBehaviour
         GridOccupancyManager.Instance.MoveOccupant(oldPos, currentGridPosition, gameObject);
 
         isMoving = false;
-        DebugLog($"{gameObject.name} moved to {currentGridPosition}");
-    }
-
-    private void DebugLog(string message)
-    {
-        if (showDebugLogs)
-        {
-            Debug.Log(message);
-        }
     }
 }

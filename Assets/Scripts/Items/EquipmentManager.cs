@@ -19,6 +19,7 @@ public class EquipmentManager : MonoBehaviour
 
         equippedWeapon = itemData;
         DebugLog($"Weapon equipped: {itemData.itemName}");
+        UIManager.Instance?.RefreshEquipment();
     }
 
     public void EquipArmor(ItemData itemData)
@@ -28,6 +29,7 @@ public class EquipmentManager : MonoBehaviour
 
         equippedArmor = itemData;
         DebugLog($"Armor equipped: {itemData.itemName}");
+        UIManager.Instance?.RefreshEquipment();
     }
 
     public int GetAttackBonus()

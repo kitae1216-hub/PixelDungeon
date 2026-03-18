@@ -53,12 +53,15 @@ public class PlayerController : MonoBehaviour
         GridOccupancyManager.Instance?.SetOccupant(currentGridPosition, gameObject);
 
         isInitialized = true;
-        DebugLog($"Start Position = {currentGridPosition}");
+        UIManager.Instance?.RefreshAll();
     }
 
     private void Update()
     {
         if (!isInitialized)
+            return;
+
+        if (GameManager.Instance != null && (GameManager.Instance.IsGameOver || GameManager.Instance.IsGameClear))
             return;
 
         HandleInventoryHotkeys();
@@ -163,7 +166,6 @@ public class PlayerController : MonoBehaviour
     private void TryMove(Vector2Int direction)
     {
         Vector2Int targetGridPosition = currentGridPosition + direction;
-        DebugLog($"TryMove: {currentGridPosition} -> {targetGridPosition}");
 
         GameObject occupant = GridOccupancyManager.Instance?.GetOccupant(targetGridPosition);
 
@@ -180,14 +182,12 @@ public class PlayerController : MonoBehaviour
         bool canMove = GridManager.Instance.IsWalkable(targetGridPosition);
         if (!canMove)
         {
-            DebugLog($"Blocked at {targetGridPosition}");
             nextRepeatTime = Time.time + repeatInterval;
             return;
         }
 
         if (GridOccupancyManager.Instance != null && GridOccupancyManager.Instance.IsOccupied(targetGridPosition))
         {
-            DebugLog($"Tile occupied at {targetGridPosition}");
             nextRepeatTime = Time.time + repeatInterval;
             return;
         }
@@ -208,7 +208,7 @@ public class PlayerController : MonoBehaviour
         if (enemyHealth != null)
         {
             enemyHealth.TakeDamage(finalAttackPower);
-            DebugLog($"Player attacked {enemy.gameObject.name} for {finalAttackPower}");
+            MessageLog.Instance?.AddMessage($"플레이어 공격 {finalAttackPower}");
         }
 
         GameManager.Instance.BeginPlayerAction();
@@ -249,12 +249,12 @@ public class PlayerController : MonoBehaviour
         if (CheckStairsAndGoNextFloor())
         {
             nextRepeatTime = Time.time + 0.25f;
+            UIManager.Instance?.RefreshAll();
             yield break;
         }
 
-        DebugLog($"Moved to {currentGridPosition}");
         GameManager.Instance.EndPlayerAction();
-
+        UIManager.Instance?.RefreshAll();
         nextRepeatTime = Time.time + repeatInterval;
     }
 
@@ -263,11 +263,7 @@ public class PlayerController : MonoBehaviour
         PickupItem pickup = ItemPickupManager.Instance?.GetItemAt(currentGridPosition);
         if (pickup != null)
         {
-            bool picked = pickup.TryPickup(gameObject);
-            if (picked)
-            {
-                DebugLog($"Picked up item at {currentGridPosition}");
-            }
+            pickup.TryPickup(gameObject);
         }
     }
 
@@ -279,7 +275,7 @@ public class PlayerController : MonoBehaviour
 
         if (currentGridPosition == dungeonGenerator.GetStairsPosition())
         {
-            DebugLog("Stepped on stairs.");
+            MessageLog.Instance?.AddMessage("계단 발견");
             FloorManager.Instance?.GoToNextFloor();
             return true;
         }
@@ -303,7 +299,7 @@ public class PlayerController : MonoBehaviour
         GridOccupancyManager.Instance?.SetOccupant(currentGridPosition, gameObject);
 
         isInitialized = true;
-        DebugLog($"Forced spawn position = {currentGridPosition}");
+        UIManager.Instance?.RefreshAll();
     }
 
     public Vector2Int GetCurrentGridPosition()

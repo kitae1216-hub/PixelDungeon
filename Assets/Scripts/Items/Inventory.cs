@@ -20,12 +20,14 @@ public class Inventory : MonoBehaviour
         if (items.Count >= maxSlots)
         {
             DebugLog("Inventory full.");
+            MessageLog.Instance?.AddMessage("ÀÎº¥Åä¸®°¡ °¡µæ Ã¡½À´Ï´Ù");
             return false;
         }
 
         items.Add(itemData);
         DebugLog($"Added item: {itemData.itemName}");
-        PrintInventory();
+        MessageLog.Instance?.AddMessage($"{itemData.itemName} È¹µæ");
+        UIManager.Instance?.RefreshInventory();
         return true;
     }
 
@@ -36,7 +38,7 @@ public class Inventory : MonoBehaviour
 
         DebugLog($"Removed item: {items[index].itemName}");
         items.RemoveAt(index);
-        PrintInventory();
+        UIManager.Instance?.RefreshInventory();
         return true;
     }
 
@@ -66,7 +68,7 @@ public class Inventory : MonoBehaviour
                 if (health != null && item.healAmount > 0)
                 {
                     health.Heal(item.healAmount);
-                    DebugLog($"Used consumable: {item.itemName}, healed {item.healAmount}");
+                    MessageLog.Instance?.AddMessage($"{item.itemName} »ç¿ë");
                     RemoveItemAt(index);
                     return true;
                 }
@@ -76,7 +78,7 @@ public class Inventory : MonoBehaviour
                 if (equipment != null)
                 {
                     equipment.EquipWeapon(item);
-                    DebugLog($"Equipped weapon: {item.itemName}");
+                    MessageLog.Instance?.AddMessage($"{item.itemName} ÀåÂø");
                     RemoveItemAt(index);
                     return true;
                 }
@@ -86,7 +88,7 @@ public class Inventory : MonoBehaviour
                 if (equipment != null)
                 {
                     equipment.EquipArmor(item);
-                    DebugLog($"Equipped armor: {item.itemName}");
+                    MessageLog.Instance?.AddMessage($"{item.itemName} ÀåÂø");
                     RemoveItemAt(index);
                     return true;
                 }
@@ -99,27 +101,6 @@ public class Inventory : MonoBehaviour
     public bool IsFull()
     {
         return items.Count >= maxSlots;
-    }
-
-    public void PrintInventory()
-    {
-        if (!showDebugLogs)
-            return;
-
-        string result = "Inventory: ";
-        if (items.Count == 0)
-        {
-            result += "(empty)";
-        }
-        else
-        {
-            for (int i = 0; i < items.Count; i++)
-            {
-                result += $"[{i}] {items[i].itemName} ";
-            }
-        }
-
-        Debug.Log(result);
     }
 
     private void DebugLog(string message)

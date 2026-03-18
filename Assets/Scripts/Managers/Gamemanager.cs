@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class GameManager : MonoBehaviour
 
     public bool IsPlayerTurn { get; private set; } = true;
     public bool IsActionProcessing { get; private set; } = false;
+    public bool IsGameOver { get; private set; } = false;
+    public bool IsGameClear { get; private set; } = false;
 
     private readonly List<EnemyController> enemies = new List<EnemyController>();
     private PlayerController player;
@@ -31,16 +34,25 @@ public class GameManager : MonoBehaviour
 
     public bool CanPlayerAct()
     {
+        if (IsGameOver || IsGameClear)
+            return false;
+
         return IsPlayerTurn && !IsActionProcessing;
     }
 
     public void BeginPlayerAction()
     {
+        if (IsGameOver || IsGameClear)
+            return;
+
         IsActionProcessing = true;
     }
 
     public void EndPlayerAction()
     {
+        if (IsGameOver || IsGameClear)
+            return;
+
         StartCoroutine(ProcessEnemyTurn());
     }
 
@@ -75,6 +87,32 @@ public class GameManager : MonoBehaviour
         enemies.Clear();
     }
 
+    public void TriggerGameOver()
+    {
+        if (IsGameOver)
+            return;
+
+        IsGameOver = true;
+        IsActionProcessing = false;
+        IsPlayerTurn = false;
+
+        MessageLog.Instance?.AddMessage("게임 오버");
+        UIManager.Instance?.ShowGameOverPanel();
+    }
+
+    public void TriggerGameClear()
+    {
+        if (IsGameClear)
+            return;
+
+        IsGameClear = true;
+        IsActionProcessing = false;
+        IsPlayerTurn = false;
+
+        MessageLog.Instance?.AddMessage("데모 클리어");
+        UIManager.Instance?.ShowClearPanel();
+    }
+
     private IEnumerator ProcessEnemyTurn()
     {
         IsPlayerTurn = false;
@@ -91,6 +129,9 @@ public class GameManager : MonoBehaviour
         {
             if (enemy == null)
                 continue;
+
+            if (IsGameOver || IsGameClear)
+                yield break;
 
             yield return enemy.TakeTurn(player);
         }

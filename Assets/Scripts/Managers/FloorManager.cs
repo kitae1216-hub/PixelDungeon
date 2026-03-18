@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 public class FloorManager : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class FloorManager : MonoBehaviour
     [SerializeField] private PlayerController playerController;
 
     public int CurrentFloor { get; private set; }
+    public int TargetFloor => targetFloor;
     public bool IsTransitioningFloor { get; private set; }
 
     private void Awake()
@@ -53,20 +55,26 @@ public class FloorManager : MonoBehaviour
         if (IsTransitioningFloor)
             return;
 
+        if (GameManager.Instance != null && (GameManager.Instance.IsGameOver || GameManager.Instance.IsGameClear))
+            return;
+
         IsTransitioningFloor = true;
         CurrentFloor++;
 
+        MessageLog.Instance?.AddMessage($"{CurrentFloor}층으로 이동");
         DebugLog($"Moving to Floor {CurrentFloor}");
 
         if (CurrentFloor >= targetFloor)
         {
-            Debug.Log($"Demo Clear! Reached Floor {CurrentFloor}");
+            GameManager.Instance?.TriggerGameClear();
+            IsTransitioningFloor = false;
+            return;
         }
 
         GenerateCurrentFloor();
 
-        // 층 전환 후 입력 가능 상태로 강제 복구
         GameManager.Instance?.ForcePlayerTurnReady();
+        UIManager.Instance?.RefreshAll();
 
         IsTransitioningFloor = false;
     }
@@ -74,41 +82,18 @@ public class FloorManager : MonoBehaviour
     public void GenerateCurrentFloor()
     {
         if (enemySpawner != null)
-        {
             enemySpawner.ClearExistingEnemies();
-        }
 
         if (itemSpawner != null)
-        {
             itemSpawner.ClearExistingItems();
-        }
 
-        if (GridOccupancyManager.Instance != null)
-        {
-            GridOccupancyManager.Instance.ClearAll();
-        }
-
-        if (ItemPickupManager.Instance != null)
-        {
-            ItemPickupManager.Instance.ClearAll();
-        }
-
+        GridOccupancyManager.Instance?.ClearAll();
+        ItemPickupManager.Instance?.ClearAll();
         GameManager.Instance?.ClearAllEnemies();
 
-        if (dungeonGenerator != null)
-        {
-            dungeonGenerator.GenerateDungeon();
-        }
-
-        if (enemySpawner != null)
-        {
-            enemySpawner.SpawnEnemies();
-        }
-
-        if (itemSpawner != null)
-        {
-            itemSpawner.SpawnItems();
-        }
+        dungeonGenerator?.GenerateDungeon();
+        enemySpawner?.SpawnEnemies();
+        itemSpawner?.SpawnItems();
 
         if (playerController != null)
         {

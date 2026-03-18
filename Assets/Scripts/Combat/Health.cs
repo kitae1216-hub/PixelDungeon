@@ -19,6 +19,7 @@ public class Health : MonoBehaviour
     {
         maxHP = newMaxHP;
         CurrentHP = maxHP;
+        UIManager.Instance?.RefreshHP();
     }
 
     public void TakeDamage(int amount)
@@ -33,7 +34,14 @@ public class Health : MonoBehaviour
         CurrentHP -= finalDamage;
         CurrentHP = Mathf.Max(CurrentHP, 0);
 
-        Debug.Log($"{gameObject.name} took {finalDamage} damage. HP: {CurrentHP}/{maxHP}");
+        FloatingTextSpawner.Instance?.SpawnText(
+            transform.position + Vector3.up * 0.5f,
+            $"-{finalDamage}",
+            Color.red
+        );
+
+        MessageLog.Instance?.AddMessage($"{gameObject.name} 피해 {finalDamage}");
+        UIManager.Instance?.RefreshHP();
 
         if (CurrentHP <= 0)
         {
@@ -49,12 +57,19 @@ public class Health : MonoBehaviour
         CurrentHP += amount;
         CurrentHP = Mathf.Min(CurrentHP, maxHP);
 
-        Debug.Log($"{gameObject.name} healed {amount}. HP: {CurrentHP}/{maxHP}");
+        FloatingTextSpawner.Instance?.SpawnText(
+            transform.position + Vector3.up * 0.5f,
+            $"+{amount}",
+            Color.green
+        );
+
+        MessageLog.Instance?.AddMessage($"{gameObject.name} 회복 {amount}");
+        UIManager.Instance?.RefreshHP();
     }
 
     private void Die()
     {
-        Debug.Log($"{gameObject.name} died.");
+        MessageLog.Instance?.AddMessage($"{gameObject.name} 사망");
 
         GridOccupancyManager occupancy = GridOccupancyManager.Instance;
         if (occupancy != null)
@@ -66,6 +81,12 @@ public class Health : MonoBehaviour
         if (enemy != null)
         {
             GameManager.Instance?.UnregisterEnemy(enemy);
+        }
+
+        PlayerController player = GetComponent<PlayerController>();
+        if (player != null)
+        {
+            GameManager.Instance?.TriggerGameOver();
         }
 
         if (destroyOnDeath)
